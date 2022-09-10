@@ -1,6 +1,8 @@
+//Require necessary modules
 const BaseJoi = require('joi');
 const sanitizeHtml = require('sanitize-html');
 
+//Add a joi extension to strip html tags in data
 const extension = (joi) => ({
     type: 'string',
     base: joi.string(),
@@ -20,9 +22,9 @@ const extension = (joi) => ({
         }
     }
 });
-
 const Joi = BaseJoi.extend(extension)
 
+//define campground data types and constraints
 module.exports.campgroundSchema = Joi.object({
     campground: Joi.object({
         title: Joi.string().required().escapeHTML(),
@@ -34,6 +36,7 @@ module.exports.campgroundSchema = Joi.object({
     deleteImages: Joi.array()
 });
 
+//define review data types and constraints
 module.exports.reviewSchema = Joi.object({
     review: Joi.object({
         body: Joi.string().required().escapeHTML(),

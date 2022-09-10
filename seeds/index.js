@@ -1,19 +1,21 @@
+//Require necessary node modules
 const mongoose = require('mongoose');
 const cities = require('./cities');
 const {places, descriptors} = require('./seedHelpers')
 const Campground = require('../models/campground')
 
+//start mongo database connection
 mongoose.connect('mongodb://localhost:27017/yelp-camp');
-
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error:"));
 db.once("open", ()=> {
     console.log("Database connected");
 });
 
+//function that returns a random number between 0 and array length
 const sample = array => array[Math.floor(Math.random() * array.length)];
 
-
+//creating sample campgrounds
 const seedDB = async() => {
     await Campground.deleteMany({});
     for(let i = 0; i < 300; i++) { 
@@ -47,6 +49,7 @@ const seedDB = async() => {
     }
 }
 
+//close connection after seeding the database
 seedDB().then(() => {
     mongoose.connection.close();
 });

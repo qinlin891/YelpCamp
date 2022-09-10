@@ -1,9 +1,12 @@
+//Require necessary modules
 const User = require('../models/user');
 
+//render register page
 module.exports.renderRegister = (req, res) => {
     res.render('users/register');
 };
 
+//register user and establish a login session
 module.exports.register = async(req, res, next) => {
     try{
         const {email, username, password} = req.body;
@@ -20,10 +23,12 @@ module.exports.register = async(req, res, next) => {
     } 
 };
 
+//render login page
 module.exports.renderLogin = (req, res) => {
     res.render('users/login');
 };
 
+//establish a login session
 module.exports.login = (req, res) => {
     req.flash('success', 'Welcome back');
     const redirectUrl = req.session.returnTo || '/campgrounds';
@@ -31,6 +36,8 @@ module.exports.login = (req, res) => {
     res.redirect(`${redirectUrl}`);
 };
 
+
+//logout user and clear the login session if any
 module.exports.logout = async (req, res, next) => {
     req.logout(function(err) {
         if(err) {

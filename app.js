@@ -1,8 +1,9 @@
+//Loads environment variables from .env file into process.env object
 if(process.env.NODE_ENV !== "production") {
     require('dotenv').config();
 }
 
-
+//Require necessary node modules
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
@@ -21,6 +22,7 @@ const campgroundRoutes = require('./routes/campgrounds');
 const reviewRoutes = require('./routes/reviews');
 const MongoDBStore = require("connect-mongo")(session);
 
+//Set up connection to mongo database
 const dbUrl = process.env.DB_URL || 'mongodb://localhost:27017/yelp-camp';
 mongoose.connect(dbUrl);
 const db = mongoose.connection;
@@ -29,27 +31,37 @@ db.once("open", ()=> {
     console.log("Database connected");
 });
 
+//Create a new instance of express
 const app = express();
 
+//setting view engine to ejs
 app.engine('ejs', ejsMate);
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
+//Parse incoming request body
 app.use(express.urlencoded({extended: true}))
+
+//To allow HTTP verbs such as PUT and DELETE
 app.use(methodOverride('_method'));
+
+//Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
+
+//Prevent MongoDB Operator Injection
+//Replace prohibited characters with _
 app.use(mongoSanitize({
     replaceWith: '_'
 }));
 
-const secret = process.env.SECRET || 'thisshouldbeabettersecret!';
 
+//Store session info on Mongo
+const secret = process.env.SECRET || 'thisshouldbeabettersecret!';
 const store = new MongoDBStore({
     url: dbUrl,
     secret,
     touchAfter: 24 * 60 * 60
 });
-
 store.on("error", function (e) {
     console.log("SESSION STORE ERROR", e)
 })
@@ -70,6 +82,7 @@ const sessionConfig = {
 app.use(session(sessionConfig));
 app.use(flash());
 
+//sets the content-security-policy header which helps mitigate cross-site scripting attack
 const scriptSrcUrls = [
     "https://stackpath.bootstrapcdn.com/",
     "https://api.tiles.mapbox.com/",
@@ -114,13 +127,17 @@ app.use(
     })
 );
 
+//Use passport to add authentication
 app.use(passport.initialize());
+//persistent login sessions 
 app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
 
+//serialized and deserialize users into session
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
+//setting flash messages to properties on the response object
 app.use((req, res, next) => {
     res.locals.currentUser = req.user;
     res.locals.success = req.flash('success');
@@ -128,27 +145,31 @@ app.use((req, res, next) => {
     next();
 })
 
-
+//Add routers to the middleware handling path
 app.use('/', userRoutes);
 app.use('/campgrounds', campgroundRoutes);
 app.use('/campgrounds/:id/reviews', reviewRoutes);
 
+//Handle get request to home page
 app.get('/', (req, res) => {
     res.render('home')
 });
 
+//A catch all method 
 app.all('*', (req, res, next) => {
     next(new ExpressError('Page Not Found', 404));
 })
 
+//render error page
 app.use((err, req, res, next) => {
     const {statusCode = 500} = err;
     if(!err.message) err.message = 'Oh No, Something Went Wrong!'
     res.status(statusCode).render('error', {err});
 });
 
-const port = process.env.PORT || 3000;
 
+//listen the connections on the specified port
+const port = process.env.PORT || 3000;
 app.listen(port, () => {
     console.log(`Serving on port ${port}`);
 });

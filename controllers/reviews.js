@@ -1,6 +1,8 @@
+//Require necessary modules
 const Campground = require('../models/campground')
 const Review = require('../models/review');
 
+//create new review and adding the review to the related campground
 module.exports.createReview = async (req, res) => {
     const campground = await Campground.findById(req.params.id);
     const review = new Review(req.body.review);
@@ -12,6 +14,7 @@ module.exports.createReview = async (req, res) => {
     res.redirect(`/campgrounds/${campground._id}`);
 };
 
+//delete review and reference to the review in campground
 module.exports.deleteReview = async(req,res) => {
     const {id, reviewId} = req.params;
     await Campground.findByIdAndUpdate(id, {$pull: {reviews: reviewId}});

@@ -1,8 +1,10 @@
+//Require necessary modules
 const {campgroundSchema, reviewSchema} = require('./schemas.js');
 const ExpressError = require('./utils/ExpressError');
 const Campground = require('./models/campground');
 const Review = require('./models/review');
 
+//check if user is logged in
 module.exports.isLoggedIn = (req, res, next) => {
     if(!req.isAuthenticated()) {
         req.session.returnTo = req.originalUrl;
@@ -12,6 +14,7 @@ module.exports.isLoggedIn = (req, res, next) => {
     next();
 };
 
+//validate campground data
 module.exports.validateCampground = (req, res, next) => {
     const {error} = campgroundSchema.validate(req.body);
     if(error) {
@@ -22,6 +25,7 @@ module.exports.validateCampground = (req, res, next) => {
     }
 };
 
+//check if current logged in user is the campground author
 module.exports.isAuthor = async(req, res, next) => {
     const {id} = req.params;
     const campground = await Campground.findById(id);
@@ -32,6 +36,7 @@ module.exports.isAuthor = async(req, res, next) => {
     next();
 };
 
+//validate review data
 module.exports.validateReview = (req, res, next) => {
     const {error} = reviewSchema.validate(req.body);
     if(error) {
@@ -42,6 +47,7 @@ module.exports.validateReview = (req, res, next) => {
     }
 };
 
+//check if current logged in user is the review author
 module.exports.isReviewAuthor = async(req, res, next) => {
     const {id, reviewId} = req.params;
     const review = await Review.findById(reviewId);

@@ -1,18 +1,22 @@
+//Require necessary node modules
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const Review = require('./review');
 
+//define image schema
 const ImageSchema = new Schema({
     url: String,
     filename: String
 });
 
+//add thumbnail property to image 
 ImageSchema.virtual('thumbnail').get(function() {
     return this.url.replace('/upload', '/upload/w_200');
 });
 
 const opts = { toJSON: {virtuals: true }};
 
+//define mongo campground schema
 const CampgroundSchema = new Schema({
     title: String,
     images: [ImageSchema],
@@ -42,13 +46,14 @@ const CampgroundSchema = new Schema({
     ]
 }, opts);
 
+//add pop up markup for cluster map 
 CampgroundSchema.virtual('properties.popUpMarkup').get(function() {
     return `
     <strong><a href="/campgrounds/${this._id}">${this.title}</a></strong>
     <p>${this.description.substring(0,20)}...</p>`
 }); 
 
-
+//deletes all reviews when a campground is deleted
 CampgroundSchema.post('findOneAndDelete', async function(doc) {
     if(doc) {
         await Review.deleteMany({

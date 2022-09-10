@@ -8,6 +8,7 @@ mapboxgl.accessToken = mapToken;
 
 map.addControl(new mapboxgl.NavigationControl());
 
+//set pop up message on the map 
 new mapboxgl.Marker()
     .setLngLat(campground.geometry.coordinates)
     .setPopup(

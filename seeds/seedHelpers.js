@@ -1,3 +1,4 @@
+//data for campground name 
 module.exports.descriptors = [
     'Forest',
     'Ancient',
